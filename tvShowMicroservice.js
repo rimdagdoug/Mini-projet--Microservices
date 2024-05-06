@@ -1,6 +1,7 @@
 // tvShowMicroservice.js
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const { Kafka } = require('kafkajs');
 // Charger le fichier tvShow.proto
 const tvShowProtoPath = 'tvShow.proto';
 const tvShowProtoDefinition = protoLoader.loadSync(tvShowProtoPath, {
@@ -56,5 +57,29 @@ return;
 console.log(`Le serveur s'exécute sur le port ${port}`);
 server.start();
 });
-console.log(`Microservice de séries TV en cours d'exécution sur le port
-${port}`);
+console.log(`Microservice de séries TV en cours d'exécution sur le port ${port}`);
+
+// Consumer Kafka pour écouter les messages du topic 'movies-topic'
+const kafka = new Kafka({
+    clientId: 'tvshow-service',
+    brokers: ['localhost:9092']
+});
+
+const consumer = kafka.consumer({ groupId: 'tvshow-group' });
+
+const runConsumer = async () => {
+    await consumer.connect();
+    await consumer.subscribe({ topic: 'movies-topic', fromBeginning: true });
+
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+            console.log('received message');
+            console.log({
+                value: message.value.toString(),
+                });
+            // Traiter le message reçu du topic Kafka ici
+        },
+    });
+};
+
+runConsumer().catch(console.error);
