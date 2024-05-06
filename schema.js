@@ -1,5 +1,6 @@
+const gql = require('graphql-tag');
 
-const typeDefs = `
+const typeDefs = gql`
 type Movie {
   id: String!
   title: String!

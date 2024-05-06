@@ -23,6 +23,7 @@ description: 'Ceci est un exemple de film.',
 };
 callback(null, { movie });
 },
+
 searchMovies: (call, callback) => {
 const { query } = call.request;
 // Effectuer une recherche de films en fonction de la requête
@@ -41,6 +42,17 @@ description: 'Ceci est le deuxième exemple de film.',
 ];
 callback(null, { movies });
 },
+
+createMovie: (call, callback) => {
+    const { title, description } = call.request;
+    // Créer un nouveau film dans la base de données ou effectuer toute autre opération nécessaire
+    const movie = {
+        id: '3', // ID fictif pour cet exemple
+        title,
+        description,
+        // Ajouter d'autres champs de données pour le film au besoin
+    };
+    callback(null, { movie });},
 // Ajouter d'autres méthodes au besoin
 };
 // Créer et démarrer le serveur gRPC

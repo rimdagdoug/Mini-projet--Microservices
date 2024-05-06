@@ -1,7 +1,7 @@
 // apiGateway.js
 const express = require('express');
 const bodyParser = require('body-parser');
-const { ApolloServer, gql } = require('apollo-server-express');
+const { ApolloServer } = require('apollo-server-express');
 const { graphqlHTTP } = require('express-graphql');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
@@ -85,7 +85,7 @@ app.post('/movies/grpc', (req, res) => {
 
 // GraphQL endpoint for creating movies using gRPC
 app.use('/graphql/grpc', graphqlHTTP({
-    schema: gql(typeDefs),
+    schema: typeDefs,
     rootValue: resolvers,
     graphiql: true,
 }));

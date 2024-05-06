@@ -82,14 +82,12 @@ tvShow: (_, { id }) => {
     },
     Mutation: {
         createMovie: (_, { title, description }) => {
-            console.log(title);
-            console.log('----------------------');
           // Effectuer un appel gRPC au microservice de films pour créer un nouveau film
-          const client = new movieProto.MovieService('localhost:50051', grpc.credentials.createInsecure());
-            console.log('herer');
+          const client = new movieProto.MovieService('localhost:50051',
+          grpc.credentials.createInsecure());
           return new Promise((resolve, reject) => {
             client.createMovie({ title, description }, (err, response) => {
-              if (err) {
+              if (err) {0
                 reject(err);
               } else {
                 resolve(response.movie);

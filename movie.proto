@@ -20,9 +20,17 @@ string query = 1;
 message SearchMoviesResponse {
 repeated Movie movies = 1;
 }
+message CreateMovieRequest {
+string title = 1;
+string description = 2;
+}
+message CreateMovieResponse {
+Movie movie = 1;
+}
 // Définition du service de films
 service MovieService {
 rpc GetMovie(GetMovieRequest) returns (GetMovieResponse);
 rpc SearchMovies(SearchMoviesRequest) returns (SearchMoviesResponse);
+rpc CreateMovie(CreateMovieRequest) returns (CreateMovieResponse);
 // Ajouter d'autres méthodes au besoin
 }
