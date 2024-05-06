@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 const Movie = require('./models/Movie');
 
 // Load GraphQL type definitions
-const typeDefs = require('./typeDefs');
+const typeDefs = require('./schema');
 
 // Load GraphQL resolvers
 const resolvers = require('./resolvers');
@@ -32,12 +32,20 @@ const app = express();
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true });
+const connectToMongoDB = async () => {
+    try {
+        await mongoose.connect('mongodb://localhost:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log('Connected to MongoDB');
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err);
+    }
+};
 
 // REST endpoint for creating movies
 app.post('/movies', async (req, res) => {
     try {
         const { title, description } = req.body;
+   
         const movie = new Movie({ title, description });
         await movie.save();
         res.status(201).json(movie);
@@ -46,9 +54,19 @@ app.post('/movies', async (req, res) => {
     }
 });
 
+
 // GraphQL server setup
 const apolloServer = new ApolloServer({ typeDefs, resolvers });
-apolloServer.applyMiddleware({ app });
+
+// Await server.start() before applying middleware
+const startApolloServer = async () => {
+    try {
+        await apolloServer.start();
+        apolloServer.applyMiddleware({ app });
+    } catch (err) {
+        console.error('Error starting Apollo Server:', err);
+    }
+};
 
 // gRPC client setup
 const movieClient = new movieProto.MovieService('localhost:50051', grpc.credentials.createInsecure());
@@ -72,7 +90,25 @@ app.use('/graphql/grpc', graphqlHTTP({
     graphiql: true,
 }));
 
+// GraphQL endpoint for creating movies using gRPC
+app.use('/graphql/movies', graphqlHTTP({
+    schema: typeDefs,
+    rootValue: resolvers,
+    graphiql: true,
+}));
+
+
 const port = 3000;
-app.listen(port, () => {
-    console.log(`API Gateway en cours d'exécution sur le port ${port}`);
-});
+const startServer = async () => {
+    try {
+        await connectToMongoDB();
+        await startApolloServer();
+        app.listen(port, () => {
+            console.log(`API Gateway en cours d'exécution sur le port ${port}`);
+        });
+    } catch (err) {
+        console.error('Error starting server:', err);
+    }
+};
+
+startServer();
