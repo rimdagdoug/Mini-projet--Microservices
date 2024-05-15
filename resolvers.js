@@ -1,6 +1,8 @@
 // resolvers.js
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+// MongoDB Movie model
+const Movie = require('./models/Movie');
 // Charger les fichiers proto pour les films et les séries TV
 const movieProtoPath = 'movie.proto';
 const tvShowProtoPath = 'tvShow.proto';
@@ -81,13 +83,28 @@ tvShow: (_, { id }) => {
     },
     },
     Mutation: {
-        createMovie: (_, { title, description }) => {
-          // Effectuer un appel gRPC au microservice de films pour créer un nouveau film
-          const client = new movieProto.MovieService('localhost:50051',
+      createMovie: async (_, { title, description }) => {
+        // Effectuer un appel gRPC au microservice de films pour créer un nouveau film
+          const client = new movieProto.MovieService('localhost:50051',      
           grpc.credentials.createInsecure());
+          
+        // Créez une nouvelle instance de Movie avec les données fournies
+        const newMovie = new Movie({ title, description });
+
+        // Enregistrez le film dans MongoDB
+        try {
+         await newMovie.save();
+         console.log('Film enregistré dans MongoDB:', newMovie);
+     } catch (error) {
+         console.error('Erreur lors de l\'enregistrement du film dans MongoDB:', error);
+         throw new Error('Erreur lors de l\'enregistrement du film dans MongoDB');
+     }
+     
+        // Ensuite, envoyez la demande au service gRPC pour créer le film
           return new Promise((resolve, reject) => {
+ 
             client.createMovie({ title, description }, (err, response) => {
-              if (err) {0
+              if (err) {
                 reject(err);
               } else {
                 resolve(response.movie);

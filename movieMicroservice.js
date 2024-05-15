@@ -47,10 +47,11 @@ const disconnectProducer = async () => {
     await producer.disconnect();
     console.log('Producteur Kafka déconnecté');
 };
-
+let identifiant =0;
 // Implémenter le service movie
 const movieService = {
-getMovie: (call, callback) => {
+
+    getMovie: (call, callback) => {
 // Récupérer les détails du film à partir de la base de données
 const movie = {
 id: call.request.movie_id,
@@ -84,12 +85,12 @@ createMovie:async (call, callback) => {
     const { title, description } = call.request;
     // Créer un nouveau film dans la base de données ou effectuer toute autre opération nécessaire
     const movie = {
-        id: '3', // TODO don't forget to make ID dynamic
+        id: identifiant, // TODO don't forget to make ID dynamic
         title,
         description,
         // Ajouter d'autres champs de données pour le film au besoin
     };
-
+    identifiant++;
     // Envoyer un message au topic Kafka lors de l'ajout d'un film
     await sendMessage('movies-topic', movie);
     callback(null, { movie });},
